@@ -11,7 +11,7 @@ from sanic import Blueprint
 from sanic import Sanic
 from worker.request_body.common import global_catch_exception
 
-tb_search_word = Blueprint('tb_search_word', url_prefix='/pddSearch')
+tb_search_word = Blueprint('tb_search_word', url_prefix='/tbSearch')
 
 user_agent_list = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
