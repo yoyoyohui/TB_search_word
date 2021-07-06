@@ -1,7 +1,3 @@
-'''
-https://suggest.taobao.com/sug?code=utf-8&q=%E7%9F%AD%E8%A2%96&_ksTS=1625559056875_511&callback=jsonp512&k=1&area=c2c&bucketid=6
-'''
-import re
 import sys
 import json
 import random
@@ -11,7 +7,7 @@ from sanic import Blueprint
 from sanic import Sanic
 from worker.request_body.common import global_catch_exception
 
-tb_search_word = Blueprint('tb_search_word', url_prefix='/pddSearch')
+pdd_search_word = Blueprint('pdd_search_word', url_prefix='/pddSearch')
 
 user_agent_list = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
@@ -24,31 +20,22 @@ user_agent_list = [
     'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0'
 ]
 
-# 淘宝搜索词联想接口
-@tb_search_word.route("/tbSearchWord", methods=["GET"])
+# 拼多多搜索词联想接口
+@pdd_search_word.route("/pddSearchWord", methods=["GET"])
 @global_catch_exception
 async def post_json(request):
     keyword = request.args.get('keyWord', '')
     item = {}
     if keyword:
-        keyword = parse.quote(keyword)
-        url = 'https://suggest.taobao.com/sug?code=utf-8&q=' + keyword + '&_ksTS=1625559056875_511&callback=jsonp512'
+        keyword = parse.quote(keyword)  # 编码
+        url = 'http://mobile.pinduoduo.com/proxy/api/search_suggest?pdduid=0&query={}&plat=H5&source=index&is_change=1&goods_id_list=&sug_srch_type=0'
         headers = {'User-Agent': random.choice(user_agent_list)}
-
-        rule = re.compile(r'json.*?\((.*?)\)', re.S)
-        resp = requests.get(url=url, headers=headers)
-        text = resp.text
-        text = rule.findall(text)[0]
+        response = requests.get(url=url.format(keyword), headers=headers).text
         try:
-            json_page = json.loads(text)     # json格式
-            source_result_list = json_page['result']
-            result_list = []                # 字符串列表
-            for data in source_result_list:
-                result_list.append(data[0])
-
-            length = len(result_list)
-            item['length'] = length
-            item['data'] = result_list
+            json_data = json.loads(response)
+            results = json_data['suggest']
+            item['count'] = len(results)
+            item['data'] = results
             return json.dumps(item)
         except Exception:
             pass
@@ -59,7 +46,8 @@ async def post_json(request):
 
 if __name__ == '__main__':
     app = Sanic(__name__)
-    app.blueprint(tb_search_word)
+    app.blueprint(pdd_search_word)
     debug = False if sys.platform == 'linux' else True
     app.run(host='0.0.0.0', port=8086, debug=debug)
+
 
