@@ -1,6 +1,8 @@
+
 '''
 https://suggest.taobao.com/sug?code=utf-8&q=%E7%9F%AD%E8%A2%96&_ksTS=1625559056875_511&callback=jsonp512&k=1&area=c2c&bucketid=6
 '''
+
 import re
 import sys
 import json
