@@ -30,7 +30,7 @@ user_agent_list = [
 @tb_search_word.route("/tbSearchWord", methods=["GET"])
 @global_catch_exception
 async def post_json(request):
-    keyword = request.args.get('keyWord', '')
+    keyword = request.args.get('keyword', '')
     item = {}
     if keyword:
         keyword = parse.quote(keyword)
